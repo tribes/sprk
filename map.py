@@ -15,20 +15,18 @@ if __name__ == "__main__":
 
     sc = spark.sparkContext
 
-    path = "data/2017-01-01-*.json"
+    path = "data/*.json"
 
     events =  sc.textFile(path)
     
     def toJSON(line):
         return json.loads(line)
     
-    events = events.map(toJSON)
-    events = events.map(lambda table: return [table['repo']['id'], 1])
-    """ Comptage du nombre de clé """
+    events = events.map(toJSON).filter(lambda event: 'repo' in event)
+    events = events.map(lambda table: (table['repo']['id'], 1))
+    # Comptage du nombre de cle
     events = events.reduceByKey(lambda a, b: a + b)
-    events = events.sortBy(False, lambda x: x[1])
-    top20 = events.collect()[20][1]
-    events = events.filter(lambda x: x[1] > top20) 
-    events.collect()
+    events = events.sortBy(ascending=False, keyfunc=lambda x: x[1])
+    print(events.collect()[:20])
     
     spark.stop()
