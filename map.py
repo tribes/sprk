@@ -27,6 +27,9 @@ if __name__ == "__main__":
     # Comptage du nombre de cle
     events = events.reduceByKey(lambda a, b: a + b)
     events = events.sortBy(ascending=False, keyfunc=lambda x: x[1])
-    print(events.collect()[:20])
+    print("Top repositories:")
+    print("Repository ID | Occurences")
+    for event in events.collect()[:20]:
+        print("%13d | %.10d" % event)
     
     spark.stop()
